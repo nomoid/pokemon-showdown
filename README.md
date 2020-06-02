@@ -1,3 +1,10 @@
+Battlecord - A Pokemon Battle Discord Bot
+========================================================================
+
+Battlecord is a Discord bot that can be used to play realistic Pokemon battles. The battle simulator is based on the open source [Pokemon Showdown](https://github.com/smogon/pokemon-showdown) project. This project is currently under development, so things may not be working correctly or at all - use at your own risk!
+
+The following is the original README.md file for the Pokemon Showdown project:
+
 Pokémon Showdown
 ========================================================================
 

@@ -1,3 +1,5 @@
+Contribution document for the original Pokemon Showdown project. Does not necessarily apply to this project.
+
 Contributing to Pokémon Showdown
 ========================================================================
 
