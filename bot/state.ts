@@ -2,17 +2,21 @@ import { BattleStream, getPlayerStreams, BattlePlayer } from '../sim/battle-stre
 import { Dex } from '../sim/dex'
 import { RandomPlayerAI } from '../sim/tools/random-player-ai'
 import { DiscordPlayer } from './discord-player';
+import { User, Channel, TextChannel, DMChannel, NewsChannel } from 'discord.js';
+
+export type DiscordChannel = TextChannel | DMChannel | NewsChannel;
 
 // Represents the state of a single BattleCord match
 export class State {
 
+	private human1: User;
 	private p1: BattlePlayer;
 	private p2: BattlePlayer;
 
-	constructor() {
-		// do nothing
+	constructor(private channel: DiscordChannel, creator: User) {
+		this.human1 = creator;
 	}
-	
+
 	start(): void {
 		const streams = getPlayerStreams(new BattleStream());
 
@@ -28,7 +32,7 @@ export class State {
 			team: Dex.packTeam(Dex.generateTeam('gen7randombattle')),
 		};
 
-		this.p1 = new RandomPlayerAI(streams.p1);
+		this.p1 = new DiscordPlayer(streams.p1, this.channel, this.human1);
 		this.p2 = new RandomPlayerAI(streams.p2);
 
 		console.log("p1 is " + this.p1.constructor.name);

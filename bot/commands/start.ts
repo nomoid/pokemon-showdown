@@ -14,8 +14,9 @@ const start: Command = {
 			msg.reply("Game already exists, cannot start game!");
 			return;
 		}
-		const newState = new State();
+		const newState = new State(msg.channel, msg.author);
 		env.states[id] = newState;
+		msg.channel.send("Starting new BattleCord match!");
 		newState.start();
 	} 
 };
