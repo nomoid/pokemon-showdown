@@ -1,7 +1,7 @@
 import { BattleStream, getPlayerStreams, BattlePlayer } from '../sim/battle-stream'
 import { Dex } from '../sim/dex'
 import { RandomPlayerAI } from '../sim/tools/random-player-ai'
-import { DiscordPlayer } from './discord-player';
+import { DiscordPlayer } from './client/discord-player';
 import { User, Channel, TextChannel, DMChannel, NewsChannel } from 'discord.js';
 
 export type DiscordChannel = TextChannel | DMChannel | NewsChannel;
@@ -10,7 +10,7 @@ export type DiscordChannel = TextChannel | DMChannel | NewsChannel;
 export class State {
 
 	private human1: User;
-	private p1: BattlePlayer;
+	private p1: DiscordPlayer;
 	private p2: BattlePlayer;
 
 	constructor(private channel: DiscordChannel, creator: User) {
@@ -52,5 +52,23 @@ export class State {
 		void streams.omniscient.write(`>start ${JSON.stringify(spec)}\n` +
 		`>player p1 ${JSON.stringify(p1spec)}\n` +
 		`>player p2 ${JSON.stringify(p2spec)}`);
+	}
+
+	move(user: User, choice: string): void {
+		// TODO implement pvp
+		if (user.id !== this.human1.id) {
+			user.send("You do not have permissions to make a move in this match!");
+			return;
+		}
+		this.p1.chooseMove(choice);
+	}
+
+	switchPokemon(user: User, target: string): void {
+		// TODO implement pvp
+		if (user.id !== this.human1.id) {
+			user.send("You do not have permissions to make a switch in this match!");
+			return;
+		}
+		this.p1.chooseSwitch(target);
 	}
 }
