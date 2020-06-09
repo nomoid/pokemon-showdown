@@ -1,6 +1,5 @@
 import { start } from './start'
 import { Message } from 'discord.js';
-import { State } from '../state';
 import { Environment } from '../environment';
 import { move } from './move';
 import { switchPokemon } from './switch';

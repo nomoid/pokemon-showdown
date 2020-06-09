@@ -1,5 +1,7 @@
 import { TargetType } from "./target";
 
+export const separator = "========================================\n";
+
 export class Pokemon {
 	public details: string;
 }
@@ -31,6 +33,20 @@ export class ClientState {
 
 	public constructor(private target: TargetType) {
 
+	}
+
+	displayGameInfo() {
+		let msg = separator;
+		msg += "Game Info\n";
+		msg += "Game Type: " + this.gameType + "\n";
+		msg += "Gen: " + this.gen + "\n";
+		msg += "Tier: " + this.tier + "\n";
+		msg += "Rules:\n";
+		for (const rule of this.rules) {
+			msg += "- " + rule + "\n";
+		}
+		msg += SVGPathSegCurvetoQuadraticSmoothRel;
+		this.target.send(msg);
 	}
 
 	addSide(side: string, name: string, avatar: number, rating: number) {

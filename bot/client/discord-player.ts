@@ -3,10 +3,9 @@ import { ObjectReadWriteStream } from "../../lib/streams";
 import { User, Channel } from "discord.js";
 import { DiscordChannel } from "../state";
 import { Dex } from "../../sim/dex";
-import { ClientState } from "./client-state";
+import { ClientState, separator } from "./client-state";
 import { TargetType } from "./target";
 
-const separator = "========================================\n";
 
 function getActivePokemon(pokemonList: any) {
 	for (const pokemon of pokemonList) {
@@ -73,146 +72,151 @@ export class DiscordPlayer extends BattlePlayer {
 	}
 
 	receiveCommand(cmd: string, args: string[]): void {
-		switch (cmd) {
-			case 'player': {
-				this.clientState.addSide(args[0], args[1], parseInt(args[2]), parseInt(args[3]));
-				break;
-			}
-			case 'poke': {
-				let hasItem = false;
-				if (args[2] === 'item') {
-					hasItem = true;
+		try {
+			switch (cmd) {
+				case 'player': {
+					this.clientState.addSide(args[0], args[1], parseInt(args[2]), parseInt(args[3]));
+					break;
 				}
-				this.clientState.addPokemon(args[0], args[1], hasItem);
-				break;
-			}
-			case 'teamsize': {
-				this.clientState.setTeamSize(args[0], parseInt(args[1]));
-				break;
-			}
-			case 'gametype': {
-				this.clientState.gameType = args[0];
-				break;
-			}
-			case 'gen': {
-				this.clientState.gen = parseInt(args[0]);
-				break;
-			}
-			case 'tier': {
-				this.clientState.tier = args[0];
-				break;
-			}
-			case 'rated': {
-				this.clientState.rated = true;
-				if (args.length > 0) {
-					this.clientState.ratedMsg = args[0];
+				case 'poke': {
+					let hasItem = false;
+					if (args[2] === 'item') {
+						hasItem = true;
+					}
+					this.clientState.addPokemon(args[0], args[1], hasItem);
+					break;
 				}
-				break;
-			}
-			case 'rule': {
-				this.clientState.rules.push(args[0]);
-				break;
-			}
-			case 'clearpoke': {
-				this.clientState.teamPreview = true;
-				break;
-			}
-			case 'start': {
-				// ignore
-				break;
-			}
-			case 'turn': {
-				this.clientState.turn = parseInt(args[0]);
-				this.processRequest(this.clientState.recentRequest);
-				break;
-			}
-			case 'win': {
-				this.clientState.gameOver(args[0]);
-				break;
-			}
-			case 'tie': {
-				this.clientState.gameOver(null);
-				break;
-			}
-			case 'upkeep': {
-				// ignore
-				break;
-			}
-			case 'move': {
-				// ignore animations for now
-				const pokemon = args[0];
-				const move = args[1];
-				const target = args[2];
-				let miss = false;
-				if (args.length > 3 && args[3] === 'miss') {
-					miss = true;
+				case 'teamsize': {
+					this.clientState.setTeamSize(args[0], parseInt(args[1]));
+					break;
 				}
-				this.clientState.makeMove(pokemon, move, target, miss);
-				break;
-			}
-			case 'switch': {
-				const pokemon = args[0];
-				const details = args[1];
-				const hpStatus = args[2];
-				this.clientState.makeSwitch(pokemon, details, hpStatus, 'switch');
-				break;
-			}
-			case 'drag': {
-				const pokemon = args[0];
-				const details = args[1];
-				const hpStatus = args[2];
-				this.clientState.makeSwitch(pokemon, details, hpStatus, 'drag');
-				break;
-			}
-			case 'detailschange': {
-				const pokemon = args[0];
-				const details = args[1];
-				const hpStatus = args[2];
-				this.clientState.makeSwitch(pokemon, details, hpStatus, 'detailschange');
-				break;
-			}
-			case '-formechange': {
-				const pokemon = args[0];
-				const details = args[1];
-				const hpStatus = args[2];
-				this.clientState.makeSwitch(pokemon, details, hpStatus, 'formechange');
-				break;
-			}
-			case 'replace': {
-				const pokemon = args[0];
-				const details = args[1];
-				const hpStatus = args[2];
-				this.clientState.makeSwitch(pokemon, details, hpStatus, 'replace');
-				break;
-			}
-			case 'swap': {
-				// only for multi battles, unimplemented
-				break;
-			}
-			case 'cant': {
-				const pokemon = args[0];
-				const reason = args[1];
-				let move = null;
-				if (args.length > 2) {
-					move = args[2];
+				case 'gametype': {
+					this.clientState.gameType = args[0];
+					break;
 				}
-				this.clientState.cannot(pokemon, reason, move);
-				break;
-			}
-			case 'faint': {
-				const pokemon = args[0];
-				this.clientState.faint(pokemon);
-				break;
-			}
-			default: {
-				if (cmd.startsWith("-")) {
-					// TODO implement minor actions
-					this.target.send("Minor action: " + cmd + "|" + args.join("|"));
+				case 'gen': {
+					this.clientState.gen = parseInt(args[0]);
+					break;
 				}
-				else {
-					this.target.send("Invalid command: " + cmd);
+				case 'tier': {
+					this.clientState.tier = args[0];
+					break;
+				}
+				case 'rated': {
+					this.clientState.rated = true;
+					if (args.length > 0) {
+						this.clientState.ratedMsg = args[0];
+					}
+					break;
+				}
+				case 'rule': {
+					this.clientState.rules.push(args[0]);
+					break;
+				}
+				case 'clearpoke': {
+					this.clientState.teamPreview = true;
+					break;
+				}
+				case 'start': {
+					this.clientState.displayGameInfo();
+					break;
+				}
+				case 'turn': {
+					this.clientState.turn = parseInt(args[0]);
+					this.processRequest(this.clientState.recentRequest);
+					break;
+				}
+				case 'win': {
+					this.clientState.gameOver(args[0]);
+					break;
+				}
+				case 'tie': {
+					this.clientState.gameOver(null);
+					break;
+				}
+				case 'upkeep': {
+					// ignore
+					break;
+				}
+				case 'move': {
+					// ignore animations for now
+					const pokemon = args[0];
+					const move = args[1];
+					const target = args[2];
+					let miss = false;
+					if (args.length > 3 && args[3] === 'miss') {
+						miss = true;
+					}
+					this.clientState.makeMove(pokemon, move, target, miss);
+					break;
+				}
+				case 'switch': {
+					const pokemon = args[0];
+					const details = args[1];
+					const hpStatus = args[2];
+					this.clientState.makeSwitch(pokemon, details, hpStatus, 'switch');
+					break;
+				}
+				case 'drag': {
+					const pokemon = args[0];
+					const details = args[1];
+					const hpStatus = args[2];
+					this.clientState.makeSwitch(pokemon, details, hpStatus, 'drag');
+					break;
+				}
+				case 'detailschange': {
+					const pokemon = args[0];
+					const details = args[1];
+					const hpStatus = args[2];
+					this.clientState.makeSwitch(pokemon, details, hpStatus, 'detailschange');
+					break;
+				}
+				case '-formechange': {
+					const pokemon = args[0];
+					const details = args[1];
+					const hpStatus = args[2];
+					this.clientState.makeSwitch(pokemon, details, hpStatus, 'formechange');
+					break;
+				}
+				case 'replace': {
+					const pokemon = args[0];
+					const details = args[1];
+					const hpStatus = args[2];
+					this.clientState.makeSwitch(pokemon, details, hpStatus, 'replace');
+					break;
+				}
+				case 'swap': {
+					// only for multi battles, unimplemented
+					break;
+				}
+				case 'cant': {
+					const pokemon = args[0];
+					const reason = args[1];
+					let move = null;
+					if (args.length > 2) {
+						move = args[2];
+					}
+					this.clientState.cannot(pokemon, reason, move);
+					break;
+				}
+				case 'faint': {
+					const pokemon = args[0];
+					this.clientState.faint(pokemon);
+					break;
+				}
+				default: {
+					if (cmd.startsWith("-")) {
+						// TODO implement minor actions
+						this.target.send("Minor action: " + cmd + "|" + args.join("|"));
+					}
+					else {
+						this.target.send("Invalid command: " + cmd);
+					}
 				}
 			}
+		}
+		catch (err) {
+			this.target.send(`Error while executing command (${cmd}): ${err}`);
 		}
 	}
 
